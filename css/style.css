@@ -4,3 +4,10 @@
     border: 1px solid lightgray;
   }
   
+#txt-edit {
+    position: absolute;
+    visibility: hidden;
+    background: transparent;
+    border: transparent;
+    color: transparent;
+}
