@@ -23,7 +23,9 @@ network.on('doubleClick', function (event) {
         y = event.pointer.canvas.y;
     var node = network.getNodeAt(event.pointer.DOM);
     if (!node) {
-        nodes.update({ x: x, y: y, label: 'tete' });
+        ids = nodes.update({ x: x, y: y, label: "" });
+        network.selectNodes(ids);
+        network.editNode();
     } else {
         network.editNode();
     }
@@ -48,20 +50,25 @@ document.addEventListener('keyup', function (event) {
 document.addEventListener('keypress', function (event) {
     if (event.key == 'Enter') {
         var input = document.getElementById('txt-edit');
+        input.disabled = true;
         input.style.visibility = 'hidden';
+        network.unselectAll();
     }
 });
 
 function editNode(data, callback) {
     var input = document.getElementById('txt-edit');
-    input.style.left = (data.x + 200) + 'px';
+    input.style.left = (data.x + 283) + 'px';
     input.style.top = (data.y + 200) + 'px';
+    input.disabled = false;
+    input.value = data.label ? data.label : "";
+    input.style.width = ((input.value.length + 1) * 8) + 'px';
     input.style.visibility = 'visible';
-    input.value = data.label;
-    container.appendChild(input);
+    input.focus();
 
     selectedNode = data;
     input.oninput = function () {
+        input.style.width = ((input.value.length + 1) * 6) + 'px';
         node = nodes.update({ id: network.getSelectedNodes()[0], label: input.value });
     };
 
