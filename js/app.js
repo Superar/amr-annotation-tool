@@ -9,32 +9,37 @@ var data = {
 
 var options = {
     physics: false,
+    edges: {
+        smooth: false
+    },
     manipulation: {
         enabled: false,
-        editNode: editNode
+        editNode: editNode,
+        editEdge: editEdge
     }
 };
 
 var network = new vis.Network(container, data, options);
-var selectedNode;
 
 network.on('doubleClick', function (event) {
     var x = event.pointer.canvas.x,
         y = event.pointer.canvas.y;
     var node = network.getNodeAt(event.pointer.DOM);
-    if (!node) {
+    var edge = network.getEdgeAt(event.pointer.DOM);
+    if (node) {
+        network.editNode();
+    } else if (edge) {
+        editEdge(edge);
+    } else {
         ids = nodes.update({ x: x, y: y, label: "" });
         network.selectNodes(ids);
-        network.editNode();
-    } else {
         network.editNode();
     }
 });
 
 network.on('deselectNode', function (event) {
-    var input = document.getElementById('txt-edit');
-    input.style.visibility = 'hidden';
-})
+    hidePopup('label-popup');
+});
 
 document.addEventListener('keydown', function (event) {
     if (event.key == 'Shift') {
@@ -49,28 +54,42 @@ document.addEventListener('keyup', function (event) {
 
 document.addEventListener('keypress', function (event) {
     if (event.key == 'Enter') {
-        var input = document.getElementById('txt-edit');
-        input.disabled = true;
-        input.style.visibility = 'hidden';
+        hidePopup('label-popup');
         network.unselectAll();
     }
 });
 
 function editNode(data, callback) {
-    var input = document.getElementById('txt-edit');
-    input.style.left = (data.x + 283) + 'px';
-    input.style.top = (data.y + 200) + 'px';
-    input.disabled = false;
-    input.value = data.label ? data.label : "";
-    input.style.width = ((input.value.length + 1) * 8) + 'px';
-    input.style.visibility = 'visible';
+    var input = document.getElementById('label-input');
+    input.value = data.label ? data.label : '';
     input.focus();
+    showPopup('label-popup');
 
-    selectedNode = data;
     input.oninput = function () {
-        input.style.width = ((input.value.length + 1) * 6) + 'px';
-        node = nodes.update({ id: network.getSelectedNodes()[0], label: input.value });
+        nodes.update({ id: network.getSelectedNodes()[0], label: input.value });
     };
 
     callback(data);
+}
+
+function editEdge(data) {
+    edge = edges.get(data);
+    var input = document.getElementById('label-input');
+    input.value = edge.label ? edge.label : '';
+    input.focus();
+    showPopup('label-popup');
+
+    input.oninput = function () {
+        edges.update({ id: data, label: input.value });
+    };
+}
+
+function showPopup(id) {
+    var popup = document.getElementById(id);
+    popup.classList.remove('is-hidden');
+}
+
+function hidePopup(id) {
+    var popup = document.getElementById(id);
+    popup.classList.add('is-hidden');
 }

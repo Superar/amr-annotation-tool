@@ -1,11 +1,11 @@
 #canvas {
     height: 550px;
   }
-  
-#txt-edit {
-    position: absolute;
-    visibility: hidden;
-    background: transparent;
-    border: transparent;
-    color: transparent;
+
+.popup {
+  position: absolute;
+  z-index: 1;
+  width: 300px;
+  top: 250px;
+  left: 350px;
 }
