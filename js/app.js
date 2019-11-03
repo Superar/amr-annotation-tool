@@ -15,7 +15,8 @@ var options = {
     manipulation: {
         enabled: false,
         editNode: editNode,
-        editEdge: editEdge
+        editEdge: editEdge,
+        addEdge: addEdge
     }
 };
 
@@ -69,6 +70,12 @@ function editNode(data, callback) {
         nodes.update({ id: network.getSelectedNodes()[0], label: input.value });
     };
 
+    callback(data);
+}
+
+function addEdge(data, callback) {
+    id = edges.update(data)[0];
+    editEdge(id);
     callback(data);
 }
 
