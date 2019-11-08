@@ -21,6 +21,7 @@ var options = {
 };
 
 var network = new vis.Network(container, data, options);
+var curEdge;
 
 network.on('doubleClick', function (event) {
     var x = event.pointer.canvas.x,
@@ -84,6 +85,7 @@ function editEdge(data) {
     var input = document.getElementById('label-input');
     input.value = edge.label ? edge.label : '';
     input.focus();
+    curEdge = data;
     showPopup('label-popup');
 
     input.oninput = function () {
@@ -99,4 +101,18 @@ function showPopup(id) {
 function hidePopup(id) {
     var popup = document.getElementById(id);
     popup.classList.add('is-hidden');
+}
+
+function deleteElement() {
+    var node = network.getSelectedNodes()[0];
+
+    if (node) {
+        // Deleting node
+        nodes.remove(node);
+    } else {
+        // Deleting edge
+        edges.remove(curEdge);
+        curEdge = undefined;
+    }
+    hidePopup('label-popup');
 }
