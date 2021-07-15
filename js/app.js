@@ -43,19 +43,19 @@ network.on('doubleClick', function (event) {
 });
 
 // Enter to finish editing
-// E to add an edge
 document.addEventListener('keypress', function (event) {
     if (event.key == 'Enter') {
         hidePopup('label-popup');
-    } else if (event.key == 'e') {
-        network.addEdgeMode();
     }
 });
 
 // Delete to erase an node/edge
+// F2 to add an edge
 document.addEventListener('keydown', function (event) {
     if (event.key == 'Delete') {
         deleteElement();
+    } else if (event.key == 'F2') {
+        network.addEdgeMode();
     }
 });
 
