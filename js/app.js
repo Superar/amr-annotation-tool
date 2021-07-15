@@ -13,7 +13,7 @@ var options = {
         smooth: false
     },
     manipulation: {
-        enabled: false,
+        enabled: true,
         editNode: editNode,
         editEdge: editEdge,
         addEdge: addEdge
@@ -21,8 +21,11 @@ var options = {
 };
 
 var network = new vis.Network(container, data, options);
-var curEdge;
 
+
+/** KEYBINDS DEFINITIONS **/
+
+// Edit edges/nodes or add nodes
 network.on('doubleClick', function (event) {
     var x = event.pointer.canvas.x,
         y = event.pointer.canvas.y;
@@ -39,33 +42,40 @@ network.on('doubleClick', function (event) {
     }
 });
 
-network.on('deselectNode', function (event) {
-    hidePopup('label-popup');
-});
-
-document.addEventListener('keydown', function (event) {
-    if (event.key == 'Shift') {
-        network.addEdgeMode();
-    }
-});
-document.addEventListener('keyup', function (event) {
-    if (event.key == 'Shift') {
-        network.disableEditMode();
-    }
-});
-
+// Enter to finish editing
+// E to add an edge
 document.addEventListener('keypress', function (event) {
     if (event.key == 'Enter') {
         hidePopup('label-popup');
-        network.unselectAll();
+    } else if (event.key == 'e') {
+        network.addEdgeMode();
     }
 });
 
+// Delete to erase an node/edge
+document.addEventListener('keydown', function (event) {
+    if (event.key == 'Delete') {
+        deleteElement();
+    }
+});
+
+
+/** GRAPH MANIPULATION **/
+
+// Add
+function addEdge(data, callback) {
+    id = edges.update(data)[0];
+    editEdge(id);
+    callback(data);
+}
+
+
+// Edit
 function editNode(data, callback) {
     var input = document.getElementById('label-input');
     input.value = data.label ? data.label : '';
-    input.focus();
     showPopup('label-popup');
+    input.focus();
 
     input.oninput = function () {
         nodes.update({ id: network.getSelectedNodes()[0], label: input.value });
@@ -74,24 +84,36 @@ function editNode(data, callback) {
     callback(data);
 }
 
-function addEdge(data, callback) {
-    id = edges.update(data)[0];
-    editEdge(id);
-    callback(data);
-}
-
 function editEdge(data) {
     edge = edges.get(data);
+    network.selectEdges([data])
+
     var input = document.getElementById('label-input');
     input.value = edge.label ? edge.label : '';
-    input.focus();
-    curEdge = data;
     showPopup('label-popup');
+    input.focus();
 
     input.oninput = function () {
         edges.update({ id: data, label: input.value });
     };
 }
+
+// Delete
+function deleteElement() {
+    var node = network.getSelectedNodes()[0];
+    var edge = network.getSelectedEdges()[0];
+
+    if (node) {
+        // Deleting node
+        nodes.remove(node);
+    } else if (edge){
+        // Deleting edge
+        edges.remove(edge);
+    }
+    hidePopup('label-popup');
+}
+
+/** POPUP CONTROL **/
 
 function showPopup(id) {
     var popup = document.getElementById(id);
@@ -101,18 +123,9 @@ function showPopup(id) {
 function hidePopup(id) {
     var popup = document.getElementById(id);
     popup.classList.add('is-hidden');
+    network.unselectAll();
 }
 
-function deleteElement() {
-    var node = network.getSelectedNodes()[0];
-
-    if (node) {
-        // Deleting node
-        nodes.remove(node);
-    } else {
-        // Deleting edge
-        edges.remove(curEdge);
-        curEdge = undefined;
-    }
+network.on('deselectNode', function (event) {
     hidePopup('label-popup');
-}
+});
