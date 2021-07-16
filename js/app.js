@@ -113,6 +113,18 @@ function deleteElement() {
     hidePopup('label-popup');
 }
 
+// If a node is deleted, delete all edges linked to it
+nodes.on('remove', function (event, properties, senderId) {
+    const node = properties.oldData[0].id;
+    var edgesToRemove = [];
+    edges.forEach(edge => {
+        if (edge.from == node || edge.to == node) {
+            edgesToRemove.push(edge.id)
+        }
+    });
+    edges.remove(edgesToRemove);
+});
+
 /** POPUP CONTROL **/
 
 function showPopup(id) {

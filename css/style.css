@@ -10,3 +10,7 @@
   top: 250px;
   left: 350px;
 }
+
+#penman {
+  white-space: pre;
+}
