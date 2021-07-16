@@ -1,24 +1,6 @@
 var penman = '';
 var usedVariables = [];
 
-document.addEventListener('keypress', function (event) {
-    if (event.key == 't') {
-        node_ids = nodes.getIds();
-        for (const idx in node_ids) {
-            if (Object.hasOwnProperty.call(node_ids, idx)) {
-                const node = nodes.get(node_ids[idx]);
-
-                var variable = node.variable;
-                if (!variable) {
-                    node_var = assign_variable(node);
-                    node.variable = node_var;
-                    used_variables.push(node_var);
-                }
-            }
-        }
-    }
-});
-
 // Assign variable to nodes as they are being inserted
 nodes.on('add', function (event, properties, senderId) {
     const node_id = properties.items[0];
