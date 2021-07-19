@@ -10,7 +10,12 @@ var data = {
 var options = {
     physics: false,
     edges: {
-        smooth: false
+        smooth: false,
+        arrows: {
+            to: {
+                enabled: true
+            }
+        }
     },
     manipulation: {
         enabled: true,
