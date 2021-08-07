@@ -100,6 +100,12 @@ function recursivePenman(rootId, level = 1) {
                     subgraphPenman += targetNode.variable + '\n';
                 }
             }
+
+            // Inverse relation
+            if (edge.to == rootId && edge.targetCount > 1 && curNode.numEdgesTarget > 1) {
+                subgraphPenman += '\t'.repeat(level) + edge.label + '-of' + ' ';
+                subgraphPenman += recursivePenman(edge.from, level + 1) + '\n';
+            }
         }
         // Assign that the current node is not a graph root
         curNode.isRoot = false;
@@ -146,6 +152,10 @@ function isTerminal(node) {
         const edge = edges.get(edges.getIds()[index]);
         if (edge.from == node) {
             return false;
+        } else if (edge.to == node){
+            if (nodes.get(node).numEdgesTarget > 1 && nodes.get(edge.from).numEdgesTarget == 0 && edge.targetCount > 1){
+                return false;
+            }
         }
     }
     return true;
