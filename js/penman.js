@@ -87,13 +87,15 @@ function recursivePenman(rootId, level = 1) {
     if (isTerminal(rootId)) {
         return penman + ')';
     } else {
-        var subgraphPenman = '';
+        var subgraphPenman = '\n';
         for (let index = 0; index < edges.length; index++) {
             const edge = edges.get(edges.getIds()[index]);
-            if (edge.from == rootId) {
+            const targetNode = nodes.get(edge.to);
+            
+            // Direct relation
+            if (edge.from == rootId && (edge.targetCount == 1 || targetNode.numEdgesTarget == 1)) {
                 subgraphPenman += '\t'.repeat(level) + edge.label + ' ';
 
-                const targetNode = nodes.get(edge.to);
                 if (edge.targetCount == 1) {
                     subgraphPenman += recursivePenman(edge.to, level + 1) + '\n';
                 } else {
@@ -109,7 +111,7 @@ function recursivePenman(rootId, level = 1) {
         }
         // Assign that the current node is not a graph root
         curNode.isRoot = false;
-        return penman + '\n' + subgraphPenman.slice(0, -1) + ')';
+        return penman + subgraphPenman.slice(0, -1) + ')';
     }
 }
 
