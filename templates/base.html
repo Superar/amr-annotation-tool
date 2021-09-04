@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>AMR Annotation Tool</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/bulma@0.8.0/css/bulma.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <!-- <link rel="stylesheet" type="text/css" href="css/admin.css"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- <link rel="stylesheet" href="css/style.css"> -->
+    <script type="text/javascript">
+        var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+</head>
+<body>
+    <nav class="navbar is-white">
+        <div class="container">
+            <div class="navbar-brand">
+                <a class="navbar-item brand-text" href="/">
+                    AMR editor
+                </a>
+                <a class="navbar-item brand-text" id="show_nodes">Show nodes</a>
+                <div class="navbar-burger burger" data-target="navMenu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            <div id="navMenu" class="navbar-menu">
+                <div class="navbar-start">
+                    <a class="navbar-item" href="#">
+                        Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3 ">
+                <aside class="menu is-hidden-mobile">
+                    <p class="menu-label">
+                        General
+                    </p>
+                    <ul class="menu-list">
+                        <li><a class="is-active">Editor</a></li>
+                        <li><a>Guidelines</a></li>
+                    </ul>
+                </aside>
+            </div>
+            <div class="column is-9">
+                <div id="file-js-example" class="file has-name">
+                    <label class="file-label">
+                        <input class="file-input" type="file" name="resume" id="input-penman">
+                        <span class="file-cta">
+                            <span class="file-icon">
+                                <i class="fas fa-upload"></i>
+                            </span>
+                            <span class="file-label">
+                                Choose a file…
+                            </span>
+                        </span>
+                        <span class="file-name">
+                            No file uploaded
+                        </span>
+                    </label>
+                        <div class="control">
+                            <button class="button is-primary" id="submit-penman">Submit</button>
+                        </div>
+                    </div>
+                <section class="info-tiles">
+                    <div class="tile is-ancestor has-text-centered">
+                        <div class="tile is-parent">
+                            <article class="tile is-child box">
+                                <p class="title">150/200</p>
+                                <p class="subtitle">Progress</p>
+                            </article>
+                        </div>
+                        <div class="tile is-parent">
+                            <article class="tile is-child box">
+                                <p class="title">20</p>
+                                <p class="subtitle">New verbs</p>
+                            </article>
+                        </div>
+                        <div class="tile is-parent">
+                            <article class="tile is-child box">
+                                <p class="title">3</p>
+                                <p class="subtitle">To revise</p>
+                            </article>
+                        </div>
+                    </div>
+                </section>
+                {% block content %} {% endblock %}
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+    <script async type="text/javascript" src="{{ url_for('static', filename='js/bulma.js') }}"></script>
+    <!-- <script async type="text/javascript" src="js/bulma.js"></script> -->
+    <script src="https://visjs.github.io/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <!-- <script src="js/app.js"></script> -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/penman.js') }}"></script>
+    <!-- <script src="js/penman.js"></script> -->
+    <script>
+        const fileInput = document.querySelector('#file-js-example input[type=file]');
+        fileInput.onchange = () => {
+            if (fileInput.files.length > 0) {
+                const fileName = document.querySelector('#file-js-example .file-name');
+                fileName.textContent = fileInput.files[0].name;
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        document.getElementById("submit-penman").addEventListener("click", function (event) {
+        var file = document.getElementById("input-penman").files[0];
+        var fileReader = new FileReader();
+        fileReader.onload = function(fileLoadedEvent) {
+            var text = fileLoadedEvent.target.result;
+            $.ajax({
+                type: 'GET',
+                url: $SCRIPT_ROOT + '/read_penman',
+                data: {text: text},
+                success: function (response) {
+                    var x = 0.0;
+                    var y = 0.0;
+                    var map = {};
+                    var flag1 = false;
+                    var flag2 = false;
+                    console.log(response['graph']);
+                    for (var i = 0; i < response['graph'].length; i++) {
+                        if (!map.hasOwnProperty(response['graph'][i][1])) {
+                            map[response['graph'][i][1]] = addNode(response['graph'][i][1], x, y);
+                            x = -5.0;
+                            y = -3.0;
+                            flag1 = true;
+                        }
+                        if (!map.hasOwnProperty(response['graph'][i][2])) {
+                            map[response['graph'][i][2]] = addNode(response['graph'][i][2], x, y);
+                            x = 15.0;
+                            y = 12.0;
+                            flag2 = true;
+                        }
+                        if (flag1 === true && flag2 === false && response['graph'][i][0] === 'domain') {
+                            addEdge(':mod', map[response['graph'][i][2]], map[response['graph'][i][1]]);
+                        }
+                        else {
+                            addEdge(':'+response['graph'][i][0], map[response['graph'][i][1]], map[response['graph'][i][2]]);
+                        }
+                        flag1 = false;
+                        flag2 = false;
+
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
+        };
+        fileReader.readAsText(file, "UTF-8");
+        });
+        function addNode(node, x, y) {
+            var updadeIds = nodes.add([{
+                label: node,
+                x: x,
+                y: y
+
+            }]);
+            nodes.update({id: updadeIds[0]});
+            return updadeIds[0]
+            //network.selectedNodes([updadeIds[0]]);
+        }
+        function addEdge(edge, from, to) {
+            //network.body.data.edges.add([{from: from, to: to, label: edge}])
+            var updateIds = edges.add([{
+                label: edge,
+                from: from,
+                to: to
+            }]);
+            edges.update({id: updateIds[0]});
+        }
+    </script>
+</body>
+</html>
